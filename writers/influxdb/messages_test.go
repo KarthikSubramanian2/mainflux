@@ -11,6 +11,7 @@ import (
 	log "github.com/mainflux/mainflux/logger"
 	writer "github.com/mainflux/mainflux/writers/influxdb"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -62,16 +63,16 @@ func TestSave(t *testing.T) {
 	q := fmt.Sprintf("SELECT * FROM test..messages\n")
 
 	client, err := influxdata.NewHTTPClient(clientCfg)
-	assert.Nil(t, err, fmt.Sprintf("Creation of InfluxDB client expected to succeed.\n"))
+	require.Nil(t, err, fmt.Sprintf("Creating new InfluxDB client expected to succeed: %s.\n", err))
 
-	repo, err := writer.New(client, testDB, "messages")
-	assert.Nil(t, err, fmt.Sprintf("InfluxDB repo creation expected to succeed.\n"))
+	repo, err := writer.New(client, testDB)
+	require.Nil(t, err, fmt.Sprintf("Creating new InfluxDB repo expected to succeed: %s.\n", err))
 
 	err = repo.Save(msg)
-	assert.Nil(t, err, fmt.Sprintf("Save operation expected to succeed.\n"))
+	assert.Nil(t, err, fmt.Sprintf("Save operation expected to succeed: %s.\n", err))
 
 	row, err := queryDB(q)
-	assert.Nil(t, err, fmt.Sprintf("Querying InfluxDB to retrieve data count expected to succeed.\n"))
+	assert.Nil(t, err, fmt.Sprintf("Querying InfluxDB to retrieve data count expected to succeed: %s.\n", err))
 
 	count := len(row)
 	assert.Equal(t, 1, count, fmt.Sprintf("Expected to have 1 value, found %d instead.\n", count))

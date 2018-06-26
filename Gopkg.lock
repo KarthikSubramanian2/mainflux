@@ -109,6 +109,17 @@
   version = "1.2"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/gocql/gocql"
+  packages = [
+    ".",
+    "internal/lru",
+    "internal/murmur",
+    "internal/streams"
+  ]
+  revision = "651d6b1f343c6e168e45d119dcfe8f71e5bafb32"
+
+[[projects]]
   name = "github.com/gogo/protobuf"
   packages = ["proto"]
   revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
@@ -127,10 +138,22 @@
   version = "v1.1.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/golang/snappy"
+  packages = ["."]
+  revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
+
+[[projects]]
   name = "github.com/gorilla/websocket"
   packages = ["."]
   revision = "ea4d1f681babbce9545c9c5f3d5194a789c89f5b"
   version = "v1.2.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/hailocab/go-hostpool"
+  packages = ["."]
+  revision = "e80d13ce29ede4452c43dea11e79b9bc8a15b478"
 
 [[projects]]
   name = "github.com/influxdata/influxdb"
@@ -162,6 +185,37 @@
   packages = ["pbutil"]
   revision = "3247c84500bff8d9fb6d579d800f20b3e091582c"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/mongodb/mongo-go-driver"
+  packages = [
+    "bson",
+    "bson/builder",
+    "bson/decimal",
+    "bson/elements",
+    "bson/objectid",
+    "core/addr",
+    "core/auth",
+    "core/auth/internal/gssapi",
+    "core/command",
+    "core/connection",
+    "core/connstring",
+    "core/description",
+    "core/dispatch",
+    "core/options",
+    "core/readconcern",
+    "core/readpref",
+    "core/result",
+    "core/tag",
+    "core/topology",
+    "core/version",
+    "core/wiremessage",
+    "core/writeconcern",
+    "internal",
+    "mongo"
+  ]
+  revision = "29a4d7d5b648e5b0b60e03e3bd71c11703f0c203"
+  version = "v0.0.5"
 
 [[projects]]
   name = "github.com/nats-io/go-nats"
@@ -311,7 +365,10 @@
 
 [[projects]]
   name = "github.com/stretchr/testify"
-  packages = ["assert"]
+  packages = [
+    "assert",
+    "require"
+  ]
   revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
   version = "v1.2.1"
 
@@ -327,6 +384,7 @@
   packages = [
     "bcrypt",
     "blowfish",
+    "pbkdf2",
     "ssh/terminal"
   ]
   revision = "2d027ae1dddd4694d54f7a8b6cbe78dca8720226"
@@ -344,6 +402,12 @@
     "trace"
   ]
   revision = "f73e4c9ed3b7ebdd5f699a16a880c2b1994e50dd"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sync"
+  packages = ["semaphore"]
+  revision = "1d60e4601c6fd243af51cc01ddf169918a5407ca"
 
 [[projects]]
   branch = "master"
@@ -419,6 +483,12 @@
   version = "v1.7.1"
 
 [[projects]]
+  name = "gopkg.in/inf.v0"
+  packages = ["."]
+  revision = "d2d2541c53f18d2a059457998ce2876cc8e67cbf"
+  version = "v0.9.1"
+
+[[projects]]
   name = "gopkg.in/ory-am/dockertest.v3"
   packages = ["."]
   revision = "2e92e7784b6fb199fd168aa46269a2f1b34f299e"
@@ -427,6 +497,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2181c222a2bd27cca2ed846bfa198f2ab1c150f6abe7843344b70bdd2bf4b5e3"
+  inputs-digest = "55dda2253f8fab15f237a4a6b9b0dba309f489fb45455cd594fab816047af712"
   solver-name = "gps-cdcl"
   solver-version = 1

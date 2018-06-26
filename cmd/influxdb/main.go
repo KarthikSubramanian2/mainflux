@@ -12,15 +12,12 @@ import (
 	"github.com/mainflux/mainflux"
 	log "github.com/mainflux/mainflux/logger"
 	"github.com/mainflux/mainflux/writers"
-	influxdb "github.com/mainflux/mainflux/writers/influxdb"
+	"github.com/mainflux/mainflux/writers/influxdb"
 	nats "github.com/nats-io/go-nats"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 )
 
 const (
-	name         = "influxdb-writer"
-	senML        = "out.senml"
-	prefix       = "http://"
 	defNatsURL   = nats.DefaultURL
 	defPort      = "8180"
 	defPointName = "messages"
@@ -31,24 +28,22 @@ const (
 	defDBPass    = "mainflux"
 
 	envNatsURL = "MF_NATS_URL"
-	envPort    = "MF_INFLUXDB_WRITER_PORT"
-	envPoint   = "MF_INFLUXDB_POINT"
-	envDBName  = "MF_INFLUXDB_DB_NAME"
-	envDBHost  = "MF_INFLUXDB_DB_HOST"
-	envDBPort  = "MF_INFLUXDB_DB_PORT"
-	envDBUser  = "MF_INFLUXDB_DB_USER"
-	envDBPass  = "MF_INFLUXDB_DB_PASS"
+	envPort    = "MF_INFLUX_WRITER_PORT"
+	envDBName  = "MF_INFLUX_WRITER_DB_NAME"
+	envDBHost  = "MF_INFLUX_WRITER_DB_HOST"
+	envDBPort  = "MF_INFLUX_WRITER_DB_PORT"
+	envDBUser  = "MF_INFLUX_WRITER_DB_USER"
+	envDBPass  = "MF_INFLUX_WRITER_DB_PASS"
 )
 
 type config struct {
-	NatsURL   string
-	Port      string
-	PointName string
-	DBName    string
-	DBHost    string
-	DBPort    string
-	DBUser    string
-	DBPass    string
+	NatsURL string
+	Port    string
+	DBName  string
+	DBHost  string
+	DBPort  string
+	DBUser  string
+	DBPass  string
 }
 
 func main() {
@@ -69,14 +64,16 @@ func main() {
 	}
 	defer client.Close()
 
-	repo, err := influxdb.New(client, cfg.DBName, cfg.PointName)
+	repo, err := influxdb.New(client, cfg.DBName)
 	if err != nil {
-		logger.Error(fmt.Sprintf("Failed to create InfluxDB writer: %s", err.Error()))
+		logger.Error(fmt.Sprintf("Failed to create InfluxDB writer: %s", err))
 		os.Exit(1)
 	}
 
-	counter, latency := makeMetrices()
-	if err := writers.Start(name, nc, logger, repo, counter, latency); err != nil {
+	counter, latency := makeMetrics()
+	repo = writers.LoggingMiddleware(repo, logger)
+	repo = writers.MetricsMiddleware(repo, counter, latency)
+	if err := writers.Start(nc, logger, repo); err != nil {
 		logger.Error(fmt.Sprintf("Failed to start message writer: %s", err))
 		os.Exit(1)
 	}
@@ -91,23 +88,22 @@ func main() {
 	go startHTTPService(cfg.Port, logger, errs)
 
 	err = <-errs
-	logger.Error(fmt.Sprintf("Influxdb writer service terminated: %s", err))
+	logger.Error(fmt.Sprintf("InfluxDB writer service terminated: %s", err))
 }
 
 func loadConfigs() (config, influxdata.HTTPConfig) {
 	cfg := config{
-		NatsURL:   mainflux.Env(envNatsURL, defNatsURL),
-		PointName: mainflux.Env(envPoint, defPointName),
-		Port:      mainflux.Env(envPort, defPort),
-		DBName:    mainflux.Env(envDBName, defDBName),
-		DBHost:    mainflux.Env(envDBHost, defDBHost),
-		DBPort:    mainflux.Env(envDBPort, defDBPort),
-		DBUser:    mainflux.Env(envDBUser, defDBUser),
-		DBPass:    mainflux.Env(envDBPass, defDBPass),
+		NatsURL: mainflux.Env(envNatsURL, defNatsURL),
+		Port:    mainflux.Env(envPort, defPort),
+		DBName:  mainflux.Env(envDBName, defDBName),
+		DBHost:  mainflux.Env(envDBHost, defDBHost),
+		DBPort:  mainflux.Env(envDBPort, defDBPort),
+		DBUser:  mainflux.Env(envDBUser, defDBUser),
+		DBPass:  mainflux.Env(envDBPass, defDBPass),
 	}
 
 	clientCfg := influxdata.HTTPConfig{
-		Addr:     fmt.Sprintf("%s%s:%s", prefix, cfg.DBHost, cfg.DBPort),
+		Addr:     fmt.Sprintf("http://%s:%s", cfg.DBHost, cfg.DBPort),
 		Username: cfg.DBUser,
 		Password: cfg.DBPass,
 	}
@@ -115,7 +111,7 @@ func loadConfigs() (config, influxdata.HTTPConfig) {
 	return cfg, clientCfg
 }
 
-func makeMetrices() (*kitprometheus.Counter, *kitprometheus.Summary) {
+func makeMetrics() (*kitprometheus.Counter, *kitprometheus.Summary) {
 	counter := kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "influxdb",
 		Subsystem: "message_writer",
